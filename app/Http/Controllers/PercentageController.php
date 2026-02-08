@@ -1,12 +1,19 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Services\PercentageService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PercentageController extends Controller
 {
+    protected $percentageService;
+
+    public function __construct(PercentageService $percentageService)
+    {
+        $this->percentageService = $percentageService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -37,60 +44,52 @@ class PercentageController extends Controller
      */
     public function operation(Request $request)
     {
-        $percent = $request->inputPercent;
-        $number = $request->inputNumber;
+        $result = $this->percentageService->calculateBasic(
+            $request->inputPercent,
+            $request->inputNumber
+        );
 
-        $calculation = ($percent / 100) * $number;
-
-        return response()->json([
-            'result' => $calculation
-        ]);
+        return response()->json(['result' => $result]);
     }
 
     public function post_increase_calculator(Request $request)
     {
-        $inputPercent = $request->inputPercent;
-        $inputNumber = $request->inputNumber;
-        $inputResult = $request->inputResult;
-        $inputDiff = $request->inputDiff;
-
-
-        $inputResult = (($inputPercent + 100)* $inputNumber) / 100;
-        $inputDiff = $inputResult-$inputNumber;
+        $data = $this->percentageService->calculateIncrease(
+            $request->inputPercent,
+            $request->inputNumber
+        );
 
         return response()->json([
-            'inputResult' => $inputResult,
-            'inputDiff' => $inputDiff
+            'inputResult' => $data['result'],
+            'inputDiff' => $data['diff']
         ]);
     }
 
     public function post_decrease_calculator(Request $request)
     {
-        $inputPercent = $request->inputPercent;
-        $inputNumber = $request->inputNumber;
+        $data = $this->percentageService->calculateDecrease(
+            $request->inputPercent,
+            $request->inputNumber
+        );
 
-
-        $inputResult = ((100 - $inputPercent)* $inputNumber) / 100;
-        $inputDiff = $inputResult-$inputNumber;
 
         return response()->json([
-            'inputResult' => $inputResult,
-            'inputDiff' => $inputDiff
+            'inputResult' => $data['result'],
+            'inputDiff' => $data['diff']
         ]);
     }
 
     public function post_change_calculator(Request $request)
     {
-        $inputPercent = $request->inputPercent;
-        $inputNumber = $request->inputNumber;
+        $data = $this->percentageService->calculateChange(
+            $request->inputPercent,
+            $request->inputNumber
+        );
 
-
-        $inputResult = ($inputNumber-$inputPercent) / $inputPercent;
-        $inputDiff = $inputNumber - $inputPercent;
 
         return response()->json([
-            'inputResult' => $inputResult*100,
-            'inputDiff' => $inputDiff
+            'inputResult' => $data['result'],
+            'inputDiff' => $data['diff']
         ]);
     }
 }
